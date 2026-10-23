@@ -45,16 +45,18 @@ class Simulation:
     return positions
   
   def _force(self, r):
-    return -self._lennard_jones(r).gradient(r)[0]
-  
-  def _lennard_jones(self, r):
-    dr = r.unsqueeze(1) - r.unsqueeze(0)
+    dr = r[:, None, :] - r[None, :, :]
     dr = self._minimum_image(dr)
+
     d2 = (dr * dr).sum(axis=-1)
-    eye = Tensor.eye(r.shape[0])
-    k = (sigma**2 / (d2 + eye))**3
-    U = 4*epsilon*(k*k - k) * (1 - eye)
-    return U.sum() / 2
 
+    eye = Tensor.eye(r.shape[0]).to(r.device)
+    d2 = d2 + eye  # avoid division by zero
 
-  
+    s2 = sigma**2 / d2
+    s6 = s2 * s2 * s2
+
+    strength = 24 * epsilon * (2 * s6 * s6 - s6) / d2
+    strength = strength * (1 - eye)
+
+    return (strength[:, :, None] * dr).sum(axis=1)
