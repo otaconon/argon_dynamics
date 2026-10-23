@@ -7,18 +7,15 @@ import vispy
 import math
 
 vispy.use("pyside6")
+
 def main():
   N = 16
-  dt = 0.01
-  steps = 1000
-  gx, gy = np.meshgrid(np.linspace(1.0, 7.0, math.ceil(math.sqrt(N))), np.linspace(1.0, 7.0, math.ceil(math.sqrt(N))))
-  grid = np.stack([gx.ravel(), gy.ravel()], axis=-1)[:N].astype(np.float32)
-  r = Tensor(grid)
-  print(r.numpy())
-  positions = sim.velocity_verlet(r, dt, steps)
-  print(positions[0])
-  print(positions[1])
-  print(positions[-1])
+  w, h = 7, 7
+  
+  r = sim.gen_grid_r(N, w, h)
+  simulation = sim.Simulation(n=N, dt=0.01, steps=1000, w=w, h=h)
+  
+  positions = simulation.run(r) 
   
   visualizer = vis.Visual(w=800, h=800, dim=(8, 8))
   visualizer.run(positions)
