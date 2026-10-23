@@ -35,6 +35,6 @@ class Visual:
         pos=points,
         face_color="cyan",
         edge_width=0,
-        size=5,
+        size=10,
     )
     self.canvas.update()
